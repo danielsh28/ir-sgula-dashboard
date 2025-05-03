@@ -1,0 +1,72 @@
+{
+  "app": {
+    "title": "IR Sguala - Dashboard",
+    "description": "Management system for IR Sguala organization"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "users": "Users",
+    "activities": "Activities",
+    "events": "Events",
+    "recentActivity": "Recent Activity",
+    "activity": "Activity",
+    "timeAgo": "{{time}} ago",
+    "settings": "Settings"
+  },
+  "header": {
+    "search": "Search...",
+    "notifications": "Notifications",
+    "help": "Help",
+    "admin": "Admin"
+  },
+  "sidebar": {
+    "organizationName": "IR Sguala",
+    "adminUser": "Admin User",
+    "adminEmail": "admin@irsguala.org"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "events": "Events",
+    "activities": "Activities",
+    "settings": "Settings"
+  },
+  "userProfile": {
+    "adminUser": "Admin User",
+    "adminEmail": "admin@irsguala.org"
+  },
+  "settings": {
+    "title": "Settings",
+    "navigation": "Navigation",
+    "organization": {
+      "profile": "Organization Profile",
+      "name": "Organization Name",
+      "email": "Email Address",
+      "description": "Description",
+      "descriptionValue": "IR Sguala is a community organization dedicated to supporting local initiatives and fostering community engagement.",
+      "website": "Website",
+      "logo": "Logo",
+      "change": "Change"
+    },
+    "preferences": "User Preferences",
+    "notifications": "Notifications",
+    "security": "Security",
+    "apiKeys": "API Keys",
+    "actions": {
+      "cancel": "Cancel",
+      "saveChanges": "Save Changes"
+    }
+  },
+  "common": {
+    "hours": "hours",
+    "minutes": "minutes",
+    "loading": "Loading...",
+    "error": "Error",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "create": "Create",
+    "submit": "Submit"
+  }
+} 

@@ -1,0 +1,72 @@
+{
+  "app": {
+    "title": "IR Sguala - לוח בקרה",
+    "description": "מערכת ניהול לארגון IR Sguala"
+  },
+  "dashboard": {
+    "title": "לוח בקרה",
+    "users": "משתמשים",
+    "activities": "פעילויות",
+    "events": "אירועים",
+    "recentActivity": "פעילות אחרונה",
+    "activity": "פעילות",
+    "timeAgo": "לפני {{time}}",
+    "settings": "הגדרות"
+  },
+  "header": {
+    "search": "חיפוש...",
+    "notifications": "התראות",
+    "help": "עזרה",
+    "admin": "מנהל"
+  },
+  "sidebar": {
+    "organizationName": "IR Sguala",
+    "adminUser": "משתמש מנהל",
+    "adminEmail": "admin@irsguala.org"
+  },
+  "navigation": {
+    "dashboard": "לוח בקרה",
+    "users": "משתמשים",
+    "events": "אירועים",
+    "activities": "פעילויות",
+    "settings": "הגדרות"
+  },
+  "userProfile": {
+    "adminUser": "משתמש מנהל",
+    "adminEmail": "admin@irsguala.org"
+  },
+  "settings": {
+    "title": "הגדרות",
+    "navigation": "ניווט",
+    "organization": {
+      "profile": "פרופיל ארגון",
+      "name": "שם הארגון",
+      "email": "כתובת דוא\"ל",
+      "description": "תיאור",
+      "descriptionValue": "IR Sguala הוא ארגון קהילתי המוקדש לתמיכה ביוזמות מקומיות וטיפוח מעורבות קהילתית.",
+      "website": "אתר אינטרנט",
+      "logo": "לוגו",
+      "change": "שינוי"
+    },
+    "preferences": "העדפות משתמש",
+    "notifications": "התראות",
+    "security": "אבטחה",
+    "apiKeys": "מפתחות API",
+    "actions": {
+      "cancel": "ביטול",
+      "saveChanges": "שמור שינויים"
+    }
+  },
+  "common": {
+    "hours": "שעות",
+    "minutes": "דקות",
+    "loading": "טוען...",
+    "error": "שגיאה",
+    "save": "שמור",
+    "cancel": "ביטול",
+    "edit": "עריכה",
+    "delete": "מחיקה",
+    "create": "יצירה",
+    "submit": "שליחה"
+  }
+} 

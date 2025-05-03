@@ -1,0 +1,72 @@
+{
+  "app": {
+    "title": "IR Sguala - لوحة المعلومات",
+    "description": "نظام إدارة لمنظمة IR Sguala"
+  },
+  "dashboard": {
+    "title": "لوحة المعلومات",
+    "users": "المستخدمون",
+    "activities": "الأنشطة",
+    "events": "الفعاليات",
+    "recentActivity": "النشاط الأخير",
+    "activity": "نشاط",
+    "timeAgo": "منذ {{time}}",
+    "settings": "الإعدادات"
+  },
+  "header": {
+    "search": "بحث...",
+    "notifications": "الإشعارات",
+    "help": "المساعدة",
+    "admin": "المسؤول"
+  },
+  "sidebar": {
+    "organizationName": "IR Sguala",
+    "adminUser": "المستخدم المسؤول",
+    "adminEmail": "admin@irsguala.org"
+  },
+  "navigation": {
+    "dashboard": "لوحة المعلومات",
+    "users": "المستخدمون",
+    "events": "الفعاليات",
+    "activities": "الأنشطة",
+    "settings": "الإعدادات"
+  },
+  "userProfile": {
+    "adminUser": "المستخدم المسؤول",
+    "adminEmail": "admin@irsguala.org"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "navigation": "التنقل",
+    "organization": {
+      "profile": "الملف التعريفي للمنظمة",
+      "name": "اسم المنظمة",
+      "email": "عنوان البريد الإلكتروني",
+      "description": "الوصف",
+      "descriptionValue": "IR Sguala هي منظمة مجتمعية مكرسة لدعم المبادرات المحلية وتعزيز المشاركة المجتمعية.",
+      "website": "الموقع الإلكتروني",
+      "logo": "الشعار",
+      "change": "تغيير"
+    },
+    "preferences": "تفضيلات المستخدم",
+    "notifications": "الإشعارات",
+    "security": "الأمان",
+    "apiKeys": "مفاتيح API",
+    "actions": {
+      "cancel": "إلغاء",
+      "saveChanges": "حفظ التغييرات"
+    }
+  },
+  "common": {
+    "hours": "ساعات",
+    "minutes": "دقائق",
+    "loading": "جارٍ التحميل...",
+    "error": "خطأ",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "create": "إنشاء",
+    "submit": "إرسال"
+  }
+} 

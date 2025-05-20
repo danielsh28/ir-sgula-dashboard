@@ -1,39 +1,43 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { CookiesProvider } from "next-client-cookies/server";
-import dynamic from "next/dynamic";
-import I18nProvider from "@/components/I18/I18nProvider";
-// Use dynamic import for client component to avoid SSR issues
+import I18nProvider from '@/components/I18/I18nProvider';
+import type { Metadata } from 'next';
+import { CookiesProvider } from 'next-client-cookies/server';
+import { Geist, Geist_Mono } from 'next/font/google';
+import { initialize } from './actions';
+import './globals.css';
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
 });
 
 export const metadata: Metadata = {
-  title: "IR Sguala - Dashboard",
-  description: "Management system for IR Sguala organization",
+  title: 'IR Sguala - Dashboard',
+  description: 'Management system for IR Sguala organization',
+  viewport:
+    'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Initialize server before rendering
+  //await initialize();
+
   return (
-    <html lang="en">
+    <html lang='he' dir='rtl'>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50`}
+        className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-gray-50 antialiased`}
       >
         <CookiesProvider>
           <I18nProvider>
-            {children}
+            <main className='flex min-h-screen flex-col'>{children}</main>
           </I18nProvider>
         </CookiesProvider>
       </body>

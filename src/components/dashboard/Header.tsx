@@ -1,51 +1,83 @@
 'use client';
 
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../LanguageSwitcher';
 
-const Header = () => {
+interface HeaderProps {
+  onMenuClick: () => void;
+}
+
+const Header = ({ onMenuClick }: HeaderProps) => {
   const { t } = useTranslation();
-  
+
   return (
-    <header className="bg-background-default shadow h-16 flex items-center justify-between px-6">
+    <header className='bg-background-default flex h-16 items-center justify-between px-6 shadow'>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={onMenuClick}
+        className='p-2 lg:hidden'
+        aria-label='Toggle menu'
+      >
+        <svg
+          className='h-6 w-6'
+          fill='none'
+          stroke='currentColor'
+          viewBox='0 0 24 24'
+        >
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M4 6h16M4 12h16M4 18h16'
+          />
+        </svg>
+      </button>
+
       {/* Search Bar */}
-      <div className="relative w-64">
+      <div className='relative w-64'>
         <input
-          type="text"
+          type='text'
           placeholder={t('header.search')}
-          className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary"
+          className='focus:ring-primary w-full rounded-lg border border-gray-300 py-2 pr-4 pl-10 focus:ring-2 focus:outline-none'
         />
-        <span className="absolute left-3 top-2.5">🔍</span>
+        <span className='absolute top-2.5 left-3'>🔍</span>
       </div>
 
       {/* Right Section */}
-      <div className="flex items-center space-x-4">
+      <div className='flex items-center space-x-4'>
         {/* Language Switcher */}
         <LanguageSwitcher />
-        
+
         {/* Notifications */}
-        <button className="relative p-2 rounded-full hover:bg-background-subtle" aria-label={t('header.notifications')}>
+        <button
+          className='hover:bg-background-subtle relative rounded-full p-2'
+          aria-label={t('header.notifications')}
+        >
           <span>🔔</span>
-          <span className="absolute top-0 right-0 inline-flex items-center justify-center w-4 h-4 text-xs font-bold text-white bg-accent rounded-full">
+          <span className='bg-accent absolute top-0 right-0 inline-flex h-4 w-4 items-center justify-center rounded-full text-xs font-bold text-white'>
             3
           </span>
         </button>
 
         {/* Help */}
-        <button className="p-2 rounded-full hover:bg-background-subtle" aria-label={t('header.help')}>
+        <button
+          className='hover:bg-background-subtle rounded-full p-2'
+          aria-label={t('header.help')}
+        >
           <span>❓</span>
         </button>
 
         {/* Divider */}
-        <span className="h-6 w-px bg-gray-300"></span>
+        <span className='h-6 w-px bg-gray-300'></span>
 
         {/* User Menu */}
-        <div className="flex items-center space-x-2 cursor-pointer">
-          <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
+        <div className='flex cursor-pointer items-center space-x-2'>
+          <div className='bg-secondary flex h-8 w-8 items-center justify-center rounded-full'>
             <span>👤</span>
           </div>
-          <span className="font-medium hidden md:inline-block text-text-dark">{t('header.admin')}</span>
+          <span className='text-text-dark hidden font-medium md:inline-block'>
+            {t('header.admin')}
+          </span>
           <span>▼</span>
         </div>
       </div>
@@ -53,4 +85,4 @@ const Header = () => {
   );
 };
 
-export default Header; 
+export default Header;

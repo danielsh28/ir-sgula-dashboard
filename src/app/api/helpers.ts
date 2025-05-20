@@ -1,6 +1,6 @@
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 
-export const queryVectorStore = async (
+  export const queryVectorStore = async (
   vectorStore: MemoryVectorStore,
   query: string
 ) => {
@@ -10,3 +10,4 @@ export const queryVectorStore = async (
     console.log(`\n ${result.pageContent}`);
   }
 };
+    

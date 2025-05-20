@@ -1,12 +1,16 @@
+import {
+  getVectorStore,
+  getVectorStoreStatus,
+  isStoreInitialized,
+} from '@/lib/vectorStore';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-import { ChatOpenAI, OpenAIEmbeddings } from '@langchain/openai';
+import { ChatOpenAI } from '@langchain/openai';
+import { LangChainAdapter, Message as VercelChatMessage } from 'ai';
 import { createStuffDocumentsChain } from 'langchain/chains/combine_documents';
 import { createRetrievalChain } from 'langchain/chains/retrieval';
-import { LangChainAdapter, Message as VercelChatMessage } from 'ai';
 import { NextResponse } from 'next/server';
-import { queryVectorStore } from '../helpers';
-import { getVectorStore } from './ingest/route';
-import { VectorStore } from '@langchain/core/vectorstores';
+
+export const runtime = 'nodejs';
 
 const formatMessage = (message: VercelChatMessage) => {
   return `${message.role}: ${message.content}`;
@@ -50,41 +54,69 @@ function asyncIterableToReadableStream<T>(
   });
 }
 
-async function* logAndPassThrough<T>(
-  iterable: AsyncIterable<T>
-): AsyncIterable<T> {
-  for await (const item of iterable) {
-    console.log('Stream item:', item);
-    yield item;
-  }
-}
-
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
 const QA_PROMPT_TEMPLATE = `אתה עובד במשרד העירייה של תל אביב. תשובה בעברית.
-  Context: """"{context}"""
+  Previous conversation:
+  {previous_messages}
+
+  Context: """{context}"""
   Question: """{input}"""
 
   Helpful answer in markdown:`;
 
+
+
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    // Check if vector store is initialized
+    // if (!isStoreInitialized()) {
+    //   return NextResponse.json(
+    //     {
+    //       error:
+    //         'Vector store is not initialized. Please wait for initialization to complete.',
+    //     },
+    //     { status: 503 }
+    //   );
+    // }
 
+    const body = await req.json();
     const messages = body.messages ?? [];
+
+    if (!messages.length) {
+      return NextResponse.json(
+        { error: 'No messages provided' },
+        { status: 400 }
+      );
+    }
+
     const formattedPreviousMessages = messages.slice(0, -1).map(formatMessage);
     const currentMessageContent = messages[messages.length - 1].content;
-    const embeddings = new OpenAIEmbeddings({
-      openAIApiKey: process.env.OPENAI_API_KEY,
-    });
 
-    const retriever = getVectorStore().asRetriever();
-    console.log('querying vector store', currentMessageContent);
-    await queryVectorStore(getVectorStore(), currentMessageContent);
+    if (!currentMessageContent) {
+      return NextResponse.json(
+        { error: 'Empty message content' },
+        { status: 400 }
+      );
+    }
+
+    // Get the global vector store and check its status
+    const vectorStore = getVectorStore();
+//    const status = getVectorStoreStatus();
+  //  console.log('Vector store status:', status);
+
+    // if (status.documentsCount === 0) {
+    //   return NextResponse.json(
+    //     { error: 'No documents loaded in vector store' },
+    //     { status: 503 }
+    //   );
+    // }
+
+    const retriever = vectorStore.asRetriever();
 
     const llm = new ChatOpenAI({
-      model: 'gpt-4o',
+      model: 'gpt-4',
       temperature: 0,
       streaming: true,
     });
@@ -103,13 +135,17 @@ export async function POST(req: Request) {
 
     const stream = await chain.stream({
       input: currentMessageContent,
+      previous_messages: formattedPreviousMessages.join('\n'),
     });
 
     const readableStream = asyncIterableToReadableStream(stream);
 
     return LangChainAdapter.toDataStreamResponse(readableStream);
   } catch (error) {
-    console.error(error);
-    return NextResponse.json('Internal Server Error', { status: 500 });
+    console.error('Chat API error:', error);
+    return NextResponse.json(
+      { error: 'Internal Server Error', details: (error as Error).message },
+      { status: 500 }
+    );
   }
 }

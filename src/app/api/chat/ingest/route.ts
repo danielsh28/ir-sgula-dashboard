@@ -1,33 +1,45 @@
-import { OpenAIEmbeddings } from '@langchain/openai';
+import { getVectorStore, setInitialized } from '@/lib/vectorStore';
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
-import { MemoryVectorStore } from 'langchain/vectorstores/memory';
-
-import 'cheerio';
 import { NextResponse } from 'next/server';
-import { queryVectorStore } from '../../helpers';
 
-let vectorStore: MemoryVectorStore;
+export const runtime = 'nodejs';
 
-export function getVectorStore() {
-  if (!vectorStore) {
-    const embeddings = new OpenAIEmbeddings({
-      model: 'text-embedding-3-large',
-    });
-    vectorStore = new MemoryVectorStore(embeddings);
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const ALLOWED_FILE_TYPES = ['text/plain', 'application/pdf'];
+
+async function validateFile(file: File): Promise<string | null> {
+  if (file.size > MAX_FILE_SIZE) {
+    return `File size exceeds maximum limit of ${MAX_FILE_SIZE / 1024 / 1024}MB`;
   }
-  return vectorStore;
+
+  if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+    return `File type ${file.type} not supported. Allowed types: ${ALLOWED_FILE_TYPES.join(', ')}`;
+  }
+
+  return null;
 }
 
 export async function POST(request: Request) {
   try {
-    const data = request.formData();
-    const file: File | null = (await data).get('data') as unknown as File;
+    const data = await request.formData();
+    const file: File | null = data.get('data') as unknown as File;
+
     if (!file) {
-      return NextResponse.json({
-        message: 'Missing file input',
-        success: false,
-      });
+      return NextResponse.json(
+        { error: 'Missing file input' },
+        { status: 400 }
+      );
     }
+
+    // Validate file
+    const validationError = await validateFile(file);
+    if (validationError) {
+      return NextResponse.json({ error: validationError }, { status: 400 });
+    }
+
+    console.log(
+      `Processing file: ${file.name} (${file.type}, ${file.size} bytes)`
+    );
 
     const fileContent = await file.text();
     const textSplitter = new RecursiveCharacterTextSplitter({
@@ -36,13 +48,35 @@ export async function POST(request: Request) {
     });
 
     const splitDocs = await textSplitter.createDocuments([fileContent]);
-    await getVectorStore().addDocuments(splitDocs);
+    console.log(`Split into ${splitDocs.length} chunks`);
 
-    return NextResponse.json({ ok: true }, { status: 200 });
-  } catch (error) {
-    console.error(error);
+    const vectorStore = getVectorStore();
+    await vectorStore.addDocuments(splitDocs);
+
+    // Mark as initialized after successful ingestion
+    setInitialized(true);
+
     return NextResponse.json(
-      { ok: false, error: (error as Error).message },
+      {
+        success: true,
+        message: 'File processed successfully',
+        details: {
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type,
+          chunks: splitDocs.length,
+        },
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('Ingest error:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Failed to process file',
+        details: (error as Error).message,
+      },
       { status: 500 }
     );
   }

@@ -7,49 +7,11 @@ export default function Chat() {
   const { messages, input, handleInputChange, handleSubmit, isLoading, error } =
     useChat();
   const messagesEndRef = useRef<HTMLDivElement>(null);
- // const [isInitializing, setIsInitializing] = useState(true);
-
-  // useEffect(() => {
-  //   // Check if vector store is initialized
-  //   async function checkInitialization() {
-  //     try {
-  //       const response = await fetch('/api/chat/status');
-  //       const data = await response.json();
-  //       if (data.isInitialized) {
-  //         setIsInitializing(false);
-  //       } else {
-  //         // Retry after 2 seconds
-  //         setTimeout(checkInitialization, 2000);
-  //       }
-  //     } catch (error) {
-  //       console.error('Failed to check initialization status:', error);
-  //       // Retry after 2 seconds
-  //       setTimeout(checkInitialization, 2000);
-  //     }
-  //   }
-  //   checkInitialization();
-  // }, []);
 
   useEffect(() => {
     // Scroll to bottom when messages change
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
-
-  // if (isInitializing) {
-  //   return (
-  //     <div className='flex h-[calc(100vh-4rem)] items-center justify-center bg-gray-50 sm:h-[calc(100vh-6rem)]'>
-  //       <div className='text-center'>
-  //         <div className='mb-4 text-2xl font-semibold text-purple-600'>
-  //           מאתחל מערכת...
-  //         </div>
-  //         <div className='text-gray-600'>
-  //           אנא המתן בזמן שאנחנו מכינים את המערכת עבורך
-  //         </div>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
   return (
     <div className='mx-auto flex h-[calc(100vh-4rem)] w-full flex-col justify-between bg-gray-50 p-2 sm:h-[calc(100vh-6rem)] sm:p-4'>
       <div

@@ -2,7 +2,6 @@ import I18nProvider from '@/components/I18/I18nProvider';
 import type { Metadata } from 'next';
 import { CookiesProvider } from 'next-client-cookies/server';
 import { Geist, Geist_Mono } from 'next/font/google';
-import { initialize } from './actions';
 import './globals.css';
 
 const geistSans = Geist({
@@ -28,7 +27,6 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   // Initialize server before rendering
-  //await initialize();
 
   return (
     <html lang='he' dir='rtl'>

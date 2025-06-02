@@ -1,86 +1,33 @@
-import {
-  getVectorStore,
-  getVectorStoreStatus,
-  isStoreInitialized,
-} from '@/lib/vectorStore';
+import { asyncIterableToReadableStream } from '@/lib/utils';
+import { VercelPostgres } from '@langchain/community/vectorstores/vercel_postgres';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-import { ChatOpenAI } from '@langchain/openai';
+import { ChatOpenAI, OpenAIEmbeddings } from '@langchain/openai';
 import { LangChainAdapter, Message as VercelChatMessage } from 'ai';
 import { createStuffDocumentsChain } from 'langchain/chains/combine_documents';
 import { createRetrievalChain } from 'langchain/chains/retrieval';
 import { NextResponse } from 'next/server';
 
-export const runtime = 'nodejs';
-
 const formatMessage = (message: VercelChatMessage) => {
   return `${message.role}: ${message.content}`;
 };
 
-function asyncIterableToReadableStream<T>(
-  iterable: AsyncIterable<T>
-): ReadableStream<string> {
-  const iterator = iterable[Symbol.asyncIterator]();
-  let accumulatedAnswer = '';
-
-  return new ReadableStream<string>({
-    async pull(controller) {
-      try {
-        while (true) {
-          const { value, done } = await iterator.next();
-          if (done) {
-            controller.close();
-            break;
-          }
-
-          const jsonString =
-            typeof value === 'string' ? value : JSON.stringify(value);
-          let parsed;
-          try {
-            parsed = JSON.parse(jsonString);
-          } catch (parseErr) {
-            console.warn('Failed to parse JSON:', jsonString, parseErr);
-            continue;
-          }
-
-          if (parsed.answer) {
-            accumulatedAnswer += parsed.answer;
-            controller.enqueue(parsed.answer);
-          }
-        }
-      } catch (err) {
-        controller.error(err);
-      }
-    },
-  });
-}
-
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
-const QA_PROMPT_TEMPLATE = `אתה עובד במשרד העירייה של תל אביב. תשובה בעברית.
-  Previous conversation:
-  {previous_messages}
+const QA_PROMPT_TEMPLATE = `אתה עובד במשרד העירייה של תל אביב. עליך לענות בעברית על שאלות תושבים.
 
-  Context: """{context}"""
-  Question: """{input}"""
+חשוב מאוד: יש להתבסס אך ורק על המידע שסופק בהקשר למטה. אם המידע אינו נמצא בהקשר, יש לציין בבירור שאין לך את המידע המבוקש.
 
-  Helpful answer in markdown:`;
+שיחה קודמת:
+{previous_messages}
 
+הקשר: """{context}"""
+שאלה: """{input}"""
 
+תשובה מועילה בסגנון מרקדאון:`;
 
 export async function POST(req: Request) {
   try {
-    // Check if vector store is initialized
-    // if (!isStoreInitialized()) {
-    //   return NextResponse.json(
-    //     {
-    //       error:
-    //         'Vector store is not initialized. Please wait for initialization to complete.',
-    //     },
-    //     { status: 503 }
-    //   );
-    // }
-
     const body = await req.json();
     const messages = body.messages ?? [];
 
@@ -101,22 +48,32 @@ export async function POST(req: Request) {
       );
     }
 
-    // Get the global vector store and check its status
-    const vectorStore = getVectorStore();
-//    const status = getVectorStoreStatus();
-  //  console.log('Vector store status:', status);
+    const embeddings = new OpenAIEmbeddings({
+      model: 'text-embedding-3-large',
+    });
 
-    // if (status.documentsCount === 0) {
-    //   return NextResponse.json(
-    //     { error: 'No documents loaded in vector store' },
-    //     { status: 503 }
-    //   );
-    // }
+    console.log('🗄️ Connecting to Vercel Postgres...');
+    const vectorStore = await VercelPostgres.initialize(embeddings, {
+      postgresConnectionOptions: {
+        connectionString: process.env.POSTGRES_URL,
+      },
+      tableName: 'langchain_vectors',
+    });
 
-    const retriever = vectorStore.asRetriever();
+    const retriever = vectorStore.asRetriever({
+      searchType: 'similarity',
+      k: 200, // Retrieve k most relevant documents
+    });
+
+    try {
+      const retrievedDocs = await retriever.invoke(currentMessageContent);
+      console.log(`Retrieved ${retrievedDocs.length} documents:`);
+    } catch (err) {
+      console.error('Error testing retriever:', err);
+    }
 
     const llm = new ChatOpenAI({
-      model: 'gpt-4',
+      model: 'gpt-4o',
       temperature: 0,
       streaming: true,
     });
@@ -128,10 +85,14 @@ export async function POST(req: Request) {
       prompt: qaPrompt,
     });
 
+    // Create the retrieval chain
     const chain = await createRetrievalChain({
       retriever,
       combineDocsChain: questionAnswerChain,
     });
+
+    // Log what we're about to query
+    console.log('🔍 Querying with:', currentMessageContent);
 
     const stream = await chain.stream({
       input: currentMessageContent,

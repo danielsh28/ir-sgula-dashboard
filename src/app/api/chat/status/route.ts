@@ -1,7 +1,6 @@
 import { getVectorStoreStatus } from '@/lib/vectorStore';
 import { NextResponse } from 'next/server';
 
-export const runtime = 'nodejs';
 
 export async function GET() {
   try {

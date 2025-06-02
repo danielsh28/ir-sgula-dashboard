@@ -9,7 +9,8 @@
     "lint": "next lint",
     "ingest": "ts-node src/scripts/ingest.ts",
     "prepare-ingest": "chmod +x scripts/wait-and-ingest.sh",
-    "dev-with-ingest": "pnpm prepare-ingest && concurrently \"next dev --turbopack\" \"scripts/wait-and-ingest.sh\""
+    "dev-with-ingest": "pnpm prepare-ingest && concurrently \"next dev --turbopack\" \"scripts/wait-and-ingest.sh\"",
+    "preload": "ts-node src/scripts/preload-vectorstore.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.3.20",

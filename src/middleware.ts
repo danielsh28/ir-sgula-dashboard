@@ -1,5 +1,19 @@
 import acceptLanguage from 'accept-language';
 import { NextRequest, NextResponse } from 'next/server';
+import { getVectorStore } from './lib/vectorStore';
+
+// Preload the vector store on server startup
+(async () => {
+  try {
+    console.log('🚀 Pre-warming vector store on server startup...');
+    const startTime = Date.now();
+    await getVectorStore();
+    const elapsed = Date.now() - startTime;
+    console.log(`✅ Vector store initialized successfully in ${elapsed}ms`);
+  } catch (error) {
+    console.error('❌ Error initializing vector store:', error);
+  }
+})();
 
 acceptLanguage.languages(['en', 'he', 'ar']);
 

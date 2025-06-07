@@ -1,7 +1,7 @@
 import { asyncIterableToReadableStream } from '@/lib/utils';
-import { VercelPostgres } from '@langchain/community/vectorstores/vercel_postgres';
+import { getVectorStore } from '@/lib/vectorStore';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-import { ChatOpenAI, OpenAIEmbeddings } from '@langchain/openai';
+import { ChatOpenAI } from '@langchain/openai';
 import { LangChainAdapter, Message as VercelChatMessage } from 'ai';
 import { createStuffDocumentsChain } from 'langchain/chains/combine_documents';
 import { createRetrievalChain } from 'langchain/chains/retrieval';
@@ -48,29 +48,14 @@ export async function POST(req: Request) {
       );
     }
 
-    const embeddings = new OpenAIEmbeddings({
-      model: 'text-embedding-3-large',
-    });
-
-    console.log('🗄️ Connecting to Vercel Postgres...');
-    const vectorStore = await VercelPostgres.initialize(embeddings, {
-      postgresConnectionOptions: {
-        connectionString: process.env.POSTGRES_URL,
-      },
-      tableName: 'langchain_vectors',
-    });
+    // Use the singleton vector store
+    console.log('Getting vector store from singleton...');
+    const vectorStore = await getVectorStore();
 
     const retriever = vectorStore.asRetriever({
       searchType: 'similarity',
-      k: 200, // Retrieve k most relevant documents
+      k: 5, // Retrieve k most relevant documents
     });
-
-    try {
-      const retrievedDocs = await retriever.invoke(currentMessageContent);
-      console.log(`Retrieved ${retrievedDocs.length} documents:`);
-    } catch (err) {
-      console.error('Error testing retriever:', err);
-    }
 
     const llm = new ChatOpenAI({
       model: 'gpt-4o',

@@ -22,15 +22,13 @@ export function asyncIterableToReadableStream<T>(
           let parsed;
           try {
             parsed = JSON.parse(jsonString);
-            //console.log('Parsed stream chunk:', parsed);
           } catch (parseErr) {
             console.warn('Failed to parse JSON:', jsonString, parseErr);
             continue;
           }
 
           // Handle different response formats that might come from the LLM
-          console.log('Parsed stream chunk:', parsed);
-          if (parsed.answer) {
+            if (parsed.answer) {
             controller.enqueue(parsed.answer);
           } else if (parsed.output) {
             controller.enqueue(parsed.output);

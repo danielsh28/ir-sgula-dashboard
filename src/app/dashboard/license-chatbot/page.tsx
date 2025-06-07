@@ -1,7 +1,7 @@
 'use client';
 import { useChat } from '@ai-sdk/react';
 import { Message } from 'ai';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 export default function Chat() {
   const { messages, input, handleInputChange, handleSubmit, isLoading, error } =

@@ -14,17 +14,27 @@ const formatMessage = (message: VercelChatMessage) => {
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
-const QA_PROMPT_TEMPLATE = `אתה עובד במשרד העירייה של תל אביב. עליך לענות בעברית על שאלות תושבים.
+const QA_PROMPT_TEMPLATE = `אתה פקיד מידע מטעם משרד העירייה של תל אביב-יפו. עליך לענות על שאלות תושבים בשפה העברית בלבד.
 
-חשוב מאוד: יש להתבסס אך ורק על המידע שסופק בהקשר למטה. אם המידע אינו נמצא בהקשר, יש לציין בבירור שאין לך את המידע המבוקש.
+**הנחיות חשובות:**
+1.  **התבססות על הקשר:** יש להתבסס אך ורק על המידע שסופק בקטע ה"הקשר" שלהלן. אל תמציא מידע או תנחש.
+2.  **,טיפול במידע חסר:** אם המידע הדרוש למתן תשובה אינו נמצא בקטע ה"הקשר", ענה בנימוס ובאופן תמציתי: "אני מתנצל/ת, אך אין לי את המידע המבוקש בהקשר שסופק לי. אנא נסה/נסי לנסח מחדש את שאלתך או פנה/פני לערוץ שירות אחר."
+3.  **סגנון וטון:** התשובות צריכות להיות **ברורות, מנומסות, תמציתיות וממוקדות**.
+4.  **פורמט תשובה:** השתמש בפורמט Markdown לתשובה שלך, כולל כותרות (אם רלוונטי), רשימות ממוספרות/נקודתיות וטקסט מודגש לפי הצורך.
+5. **בכל מקרה, אנא ספק את ההקשר שניתן לך**
 
-שיחה קודמת:
+
+**היסטוריית שיחה קודמת:**
 {previous_messages}
 
-הקשר: """{context}"""
-שאלה: """{input}"""
+**הקשר:**
+"""{context}"""
 
-תשובה מועילה בסגנון מרקדאון:`;
+**שאלת התושב:**
+"""{input}"""
+
+**תשובה:**
+`;
 
 export async function POST(req: Request) {
   try {
@@ -49,14 +59,23 @@ export async function POST(req: Request) {
     }
 
     // Use the singleton vector store
-    console.log('Getting vector store from singleton...');
     const vectorStore = await getVectorStore();
+    const numOfRetrievedDocs = 100;
 
     const retriever = vectorStore.asRetriever({
       searchType: 'similarity',
-      k: 5, // Retrieve k most relevant documents
+      k: numOfRetrievedDocs,
     });
 
+    // --- TEMPORARY DEBUGGING STEP (can remove later) ---
+    // This logs what the retriever *would* return directly, but is not
+    // the exact flow for the chain.
+    vectorStore.similaritySearch(currentMessageContent).then(docs => {
+      console.log('Number of retrieved docs:', docs.length);
+    });
+    // --- END TEMPORARY DEBUGGING STEP ---
+
+    console.log('Retriever created');
     const llm = new ChatOpenAI({
       model: 'gpt-4o',
       temperature: 0,

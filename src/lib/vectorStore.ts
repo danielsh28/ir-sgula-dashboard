@@ -1,36 +1,45 @@
-import { VercelPostgres } from '@langchain/community/vectorstores/vercel_postgres';
+import {
+  AstraDBVectorStore,
+  AstraLibArgs,
+} from '@langchain/community/vectorstores/astradb';
 import { OpenAIEmbeddings } from '@langchain/openai';
 
 // Create a singleton for vector store
-let vectorStore: VercelPostgres | null = null;
+let vectorStore: AstraDBVectorStore | null = null;
 let isInitialized = false;
 
 /**
  * Gets or initializes the vector store singleton
  */
-export async function getVectorStore(): Promise<VercelPostgres> {
+    export async function getVectorStore(): Promise<AstraDBVectorStore> {
   // Return existing instance if available
   if (vectorStore) {
     return vectorStore;
   }
 
-  // Initialize a new instance
-  console.log('Initializing vector store...');
-  const embeddings = new OpenAIEmbeddings({
-    model: 'text-embedding-3-large',
-  });
+  const embeddings = new OpenAIEmbeddings();
 
-  vectorStore = await VercelPostgres.initialize(embeddings, {
-    postgresConnectionOptions: {
-      connectionString: process.env.POSTGRES_URL,
-      max: 5, // Maximum number of clients in the pool
-      idleTimeoutMillis: 30000, // How long a client is allowed to remain idle
+  const config: AstraLibArgs = {
+    token: process.env.ASTRA_APPLICATION_TOKEN as string,
+    endpoint: process.env.ASTRA_API_ENDPOINT as string,
+    collection: process.env.ASTRA_DB_COLLECTION as string,
+    collectionOptions: {
+      vector: {
+        dimension: 1536,
+        metric: 'cosine' as const,
+      },
     },
-    tableName: 'langchain_vectors',
-  });
+  };
 
-  isInitialized = true;
-  console.log('Vector store initialized successfully');
+  // Create the vector store instance
+
+  try {
+    vectorStore = await AstraDBVectorStore.fromExistingIndex(embeddings, config);
+  } catch (error) {
+    console.error('Error initializing vector store:', error);
+    throw new Error('Error initializing vector store');
+  }
+
   return vectorStore;
 }
 

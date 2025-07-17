@@ -7,7 +7,6 @@ import { getVectorStore } from './lib/vectorStore';
   try {
     console.log('🚀 Pre-warming vector store on server startup...');
     const startTime = Date.now();
-    await getVectorStore();
     const elapsed = Date.now() - startTime;
     console.log(`✅ Vector store initialized successfully in ${elapsed}ms`);
   } catch (error) {

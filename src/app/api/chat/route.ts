@@ -14,6 +14,13 @@ const formatMessage = (message: VercelChatMessage) => {
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
+const SIMPLE_QA_PROMPT_TEMPLATE = `
+אתה פקיד מידע מטעם עיריית תל אביב-יפו. עליך לענות על שאלות התושבים בשפה העברית בלבד, ענה במורה פשוטה  ומובנת, תמציתית וממוקדת.
+השתמש בהקשר שלך כדי לענות על השאלה הבאה. הקשר: {context}. שאלה: {input}.
+היסטוריית שיחה קודמת: {previous_messages}.
+
+`;
+
 const QA_PROMPT_TEMPLATE = `אתה פקיד מידע מטעם משרד העירייה של תל אביב-יפו. עליך לענות על שאלות תושבים בשפה העברית בלבד.
 
 **הנחיות חשובות:**
@@ -82,7 +89,7 @@ export async function POST(req: Request) {
       streaming: true,
     });
 
-    const qaPrompt = ChatPromptTemplate.fromTemplate(QA_PROMPT_TEMPLATE);
+    const qaPrompt = ChatPromptTemplate.fromTemplate(SIMPLE_QA_PROMPT_TEMPLATE);
 
     const questionAnswerChain = await createStuffDocumentsChain({
       llm,

@@ -4,8 +4,16 @@ import { Message } from 'ai';
 import { useEffect, useRef } from 'react';
 
 export default function Chat() {
-  const { messages, input, handleInputChange, handleSubmit, isLoading, error } =
-    useChat();
+  const { messages, input, handleInputChange, handleSubmit, status, error } =
+    useChat({
+      initialMessages: [
+        {
+          id: 'welcome-message',
+          role: 'assistant',
+          content: 'שלום! אני עוזר הרישוי שלך. איך אני יכול לעזור לך היום?',
+        },
+      ],
+    });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -22,7 +30,7 @@ export default function Chat() {
           <div
             key={message.id}
             className={`flex ${
-              message.role === 'user' ? 'justify-start' : 'justify-end'
+              message.role === 'user' ? 'justify-end' : 'justify-start'
             }`}
           >
             <div
@@ -41,6 +49,25 @@ export default function Chat() {
             </div>
           </div>
         ))}
+
+        {status === 'submitted' && (
+          <div className='flex justify-end p-2'>
+            <div className='max-w-[85%] rounded-lg bg-white px-3 py-2 text-gray-800 shadow-md sm:max-w-[80%] sm:px-4'>
+              <div className='flex items-center space-x-2'>
+                <div className='h-2 w-2 animate-pulse rounded-full bg-gray-400'></div>
+                <div
+                  className='h-2 w-2 animate-pulse rounded-full bg-gray-400'
+                  style={{ animationDelay: '0.2s' }}
+                ></div>
+                <div
+                  className='mr-2 h-2 w-2 animate-pulse rounded-full bg-gray-400'
+                  style={{ animationDelay: '0.4s' }}
+                ></div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div ref={messagesEndRef} />
       </div>
 
@@ -63,10 +90,12 @@ export default function Chat() {
             dir='rtl'
             className='flex-1 resize-none rounded-lg border border-gray-300 p-2 text-sm shadow-sm focus:border-purple-500 focus:ring-1 focus:ring-purple-500 focus:outline-none sm:p-3 sm:text-base'
             value={input}
-            placeholder={isLoading ? 'מעבד את השאלה שלך...' : 'מה תרצה לשאול?'}
+            placeholder={
+              status === 'submitted' ? 'מעבד את השאלה שלך...' : 'מה תרצה לשאול?'
+            }
             onChange={handleInputChange}
             rows={2}
-            disabled={isLoading}
+            disabled={status === 'submitted' || status === 'streaming'}
           />
         </div>
       </form>

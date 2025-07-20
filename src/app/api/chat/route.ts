@@ -62,7 +62,7 @@ export async function POST(req: Request) {
 
     console.log('Retriever created');
     const llm = new ChatOpenAI({
-      model: 'gpt-4o',
+      model: 'gpt-4.1-mini',
       temperature: 0,
       streaming: true,
     });
